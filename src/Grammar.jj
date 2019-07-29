@@ -1,0 +1,1127 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  static = false;
+} 
+ 
+PARSER_BEGIN(C_Compiler)
+import nodes.*;
+import exceptions.*; 
+import java.util.*;
+import java.io.*;
+
+public class C_Compiler
+{
+	/*
+  	public static HashMap<String, variable> variables = new HashMap<String, variable>();
+	public static boolean[] markedAddresses = new boolean[0xFFFFF];
+
+	public static boolean variableExist(String varname) {
+		if (!variablesStorage.variables.containsKey(varname)) {
+			return false;
+		}
+		return true;
+	}
+	
+	public static variable getValue(String varname) {
+		if (!variableExist(varname)) {
+			throw new NoSuchVariableException(varname);
+		}
+		variable temp = variables.get(varname);
+		return temp;
+	}
+
+	*/
+  public static void main(String args []) throws ParseException , FileNotFoundException , IOException
+  {
+  	
+  	Reader sourceFile = new FileReader("C:/Users/USER/eclipse-workspace/CD Final Project - Last Version/src/input.txt");
+  	SimpleCharStream scs = new SimpleCharStream(sourceFile);
+	
+    C_Compiler parser = new C_Compiler(new FileReader("C:/Users/USER/eclipse-workspace/CD Final Project - Last Version/src/input.txt"));
+    try {
+    	treeNode root = parser.start();
+    	root.execute();
+    	
+    	for (Object v : variablesStorage.variables.entrySet()) {
+			System.out.println(v);
+		}
+    }
+    catch (Exception e) {
+    	e.printStackTrace();
+    }
+  }
+}
+
+PARSER_END(C_Compiler)
+
+SKIP :
+{
+	  " "
+	| "\r"
+	| "\t"
+	| "\n"
+	| < "/*" (~["*"])* "*" (~["*","/"] (~["*"])* "*" | "*")* "/" >
+}
+
+TOKEN :
+{
+	< #LETTER : (["A"-"Z", "a"-"z", "_"]) >	|
+	< #DIGIT : (["0"-"9"]) >				|
+	< BASE_8 : ("0")(["0"-"7"])* >			|
+	< BASE_10 : ("0")|(["1"-"9"])(< DIGIT >)*((".")(< DIGIT >){0,15})? >	|
+	< BASE_16 : ("0")("x"|"X")(["0"-"9", "A"-"F", "a"-"f"])+ >	|
+	< NUMBER : ("0")|(["1"-"9"])(< DIGIT >)*((".")(< DIGIT >){0,15})? >	|
+	< OPEN_CB : ("{") >						|
+	< CLOSE_CB : ("}") >					|
+	< OPEN_P : ("(") >						|
+	< CLOSE_P : (")") >						|
+	< COLON : (":") >						|
+	< SEMICOLON : (";") >					|
+	< COMMA : (",") >						|
+	< ASSIGN : ("=") >						|
+	< EQUAL_CMP : ("==") >					|
+	< NOT_EQUAL_CMP : ("!=") >				|
+	< GT_CMP : (">") >						|
+	< LT_CMP : ("<") >						|
+	< GTE_CMP : (">=") >					|
+	< LTE_CMP : ("<=") >					|
+	< IF_STMT : ("if") >					|
+	< ELSE_STMT : ("else") >				|
+	< PRINTF : ("printf") >					|
+	< SCANF : ("scanf") >					|
+	< WHILE_STMT : ("while") >				|
+	< FOR_STMT : ("for") >					|
+	< GOTO_STMT : ("goto") >				|
+	< DO_STMT : ("do") >					|
+	< SWITCH_STMT : ("switch") >			|
+	< CASE_STMT : ("case") >				|
+	< BREAK_STMT : ("break") >				|
+	< DEFAULT_STMT : ("default") >			|
+	< CHAR : ("\'")(~["\""])("\'") >	| 
+	< STRING : ("\"")(~["\""])*("\"") >		|
+
+	< BITWISE_OR : ("|") >					|
+	< BITWISE_XOR : ("^") >					|
+	< BITWISE_AND : ("&") >					|
+	< SHL : ("<<") >						|
+	< SHR : (">>") > 						|
+	< NOT : ("!") >							|
+
+	< INC : ("++") >						|
+	< DEC : ("--") >						|
+
+	< ADD : ("+") >							|
+	< SUB : ("-") >							|
+	< MUL : ("*") >							|
+	< DIV : ("/") >							|
+	< REM : ("%") >								|
+	< TILDE : ("~") >							|
+
+	< ADD_ASSIGN : ("+=") >						|
+	< SUB_ASSIGN : ("-=") >						|
+	< MUL_ASSIGN : ("*=") >						|
+	< DIV_ASSIGN : ("/=") >						|
+	< REM_ASSIGN : ("%=") >						|
+	< SHL_ASSIGN : ("<<=") >					|
+	< SHR_ASSIGN : (">>=") >					|
+	< AND_ASSIGN : ("&=") >						|
+	< OR_ASSIGN : ("|=") >						|
+	< XOR_ASSIGN : ("^=") >						|  
+
+	< INT_TYPE : ("int") >					|
+	< FLOAT_TYPE : ("float") >				|
+	< DOUBLE_TYPE : ("double") >			|
+	< CHAR_TYPE : ("char") >				|
+	
+	< IDENTIFIER : (< LETTER >)(< LETTER > | < DIGIT >)* >
+}
+
+treeNode start() : 
+{
+	blockNode bNode = new blockNode();
+}
+{
+	bNode = statements()
+	< EOF >
+	{ return bNode; }				
+}
+
+ifNode ifStatement() :
+{
+	ifNode 		  iNode = new ifNode();
+	conditionNode cNode;
+	blockNode bNode = new blockNode();
+	boolean trueConditionExist = false;
+}
+{
+	< IF_STMT >
+		cNode = condition()
+		(
+			bNode = statement()
+			{
+				if ((boolean)cNode.execute()) {
+					iNode.addChild(bNode);
+					trueConditionExist = true;
+				}
+			}
+			|
+			< OPEN_CB >
+				(
+					bNode = statements()
+					{
+						if ((boolean)cNode.execute()) {
+							iNode.addChild(bNode);
+							trueConditionExist = true;
+						}
+					}
+				)*
+			< CLOSE_CB >				
+		)
+	(
+	< ELSE_STMT > < IF_STMT >
+		cNode = condition()
+		bNode = statement()
+		{
+			if ((boolean)cNode.execute() && !trueConditionExist) {
+				iNode.addChild(bNode);
+				trueConditionExist = true;
+			}
+		}
+		|
+		< OPEN_CB >
+			(
+				bNode = statements()
+				{
+					if ((boolean)cNode.execute() && !trueConditionExist) {
+						iNode.addChild(bNode);
+						trueConditionExist = true;
+					}
+				}
+			)*
+		< CLOSE_CB >
+	)
+
+	(
+	< ELSE_STMT >
+		bNode = statement()
+		{
+			if (!trueConditionExist) {
+				iNode.addChild(bNode);
+				trueConditionExist = true;
+			}
+		}
+		|
+		< OPEN_CB >
+			(
+				bNode = statements()
+				{
+					if (!trueConditionExist) {
+						iNode.addChild(bNode);
+						trueConditionExist = true;
+					}
+				}
+			)*
+		< CLOSE_CB >
+	)?
+	{
+		return iNode;
+	}			
+		
+}
+
+switchNode switchStatement() :
+{
+	switchNode sNode = new switchNode();
+	constantNode value = new constantNode();
+	constantNode variable = new constantNode();
+	blockNode bNode = new blockNode();
+	caseNode cNode = new caseNode();
+	defaultNode dNode = new defaultNode();
+	boolean hasBreakStatement = false;
+}
+{
+	< SWITCH_STMT > < OPEN_P > 
+	variable = expression() { sNode.addChild(variable); }
+	< CLOSE_P >
+	< OPEN_CB >
+	(
+		{
+			hasBreakStatement = false;
+			cNode = new caseNode();
+		}		(			< CASE_STMT > value = expression() < COLON >
+			bNode = statements()
+			(
+				< BREAK_STMT > { hasBreakStatement = true; }
+				< SEMICOLON >
+			)?
+		)
+		{
+			cNode.addChild(value);
+			cNode.addChild(bNode);
+			cNode.setHasBreakStatement(hasBreakStatement);
+
+			sNode.addChild(cNode);
+		}
+	)+
+	(		< DEFAULT_STMT > < COLON >
+		bNode = statements()
+		{
+			dNode.addChild(bNode);
+			sNode.addChild(dNode);
+		}
+	)?
+	< CLOSE_CB >
+	{
+		return sNode;
+	}
+}
+
+conditionNode condition() :
+{
+	conditionNode cNode = new conditionNode();
+	constantNode cNode1, cNode2;
+	stringNode opNode;
+}
+{
+	< OPEN_P >
+		cNode1 = expression()
+		opNode = operators()	
+		cNode2 = expression()
+	< CLOSE_P >
+	{
+		cNode.addChild(cNode1);
+		cNode.addChild(cNode2);
+		cNode.addChild(opNode);
+
+		return cNode;	
+	}
+}
+
+conditionNode conditionBody() :
+{
+	conditionNode cNode = new conditionNode();
+	constantNode cNode1, cNode2;
+	stringNode opNode;
+}
+{
+	cNode1 = expression()
+	opNode = operators()	
+	cNode2 = expression()
+	{
+		cNode.addChild(cNode1);
+		cNode.addChild(cNode2);
+		cNode.addChild(opNode);
+
+		return cNode;	
+	}
+}
+
+scanfNode scanfStatement() :
+{
+	scanfNode scanf_Node = new scanfNode();
+	stringNode strNode = new stringNode();
+	constantNode pNode = new constantNode();
+	ArrayList<constantNode> parameters = new ArrayList<constantNode>();
+	Token string, identifierParameter;
+	Token parameter;
+}
+{
+	< SCANF >
+	< OPEN_P >
+		string = < STRING >
+		(
+			< COMMA >
+			( 
+				(
+					< BITWISE_AND >
+					parameter = < IDENTIFIER >
+					{
+						pNode = new constantNode();
+						pNode.setValue(parameter);
+					}
+				)
+				{
+					parameters.add(pNode);
+				}
+			)
+		)*
+	< CLOSE_P >
+	< SEMICOLON >
+	{
+		strNode.setValue(string.image);
+		scanf_Node.addChild(strNode);
+		for (int i = 0; i < parameters.size(); i++) {
+			scanf_Node.addChild(parameters.get(i));
+		}
+		return scanf_Node;
+	}
+}		
+
+printfNode printfStatement() :
+{
+	printfNode printf_Node = new printfNode();
+	stringNode strNode = new stringNode();
+	constantNode pNode = new constantNode();
+	ArrayList<constantNode> parameters = new ArrayList<constantNode>();
+	Token string, identifierParameter;
+	constantNode parameter = new constantNode();
+}
+{
+	< PRINTF >
+	< OPEN_P >
+		string = < STRING >
+		(
+			< COMMA >
+			(
+				(
+					parameter = expression()	|
+					parameter = string()		|
+					parameter = character()
+				)
+				{
+					parameters.add(parameter);
+				}
+			)
+		)*
+	< CLOSE_P >
+	< SEMICOLON >
+	{
+		strNode.setValue(string.image);
+		printf_Node.addChild(strNode);
+		for (int i = 0; i < parameters.size(); i++) {
+			printf_Node.addChild(parameters.get(i));
+		}
+		return printf_Node;
+	}
+}		
+
+stringNode operators() : 
+{
+	Token operator;
+	stringNode sNode = new stringNode();
+}
+{
+	(
+		operator =	< EQUAL_CMP >		|
+		operator = 	< NOT_EQUAL_CMP >	|
+		operator = 	< GT_CMP >			|
+		operator = 	< LT_CMP >			|
+		operator = 	< GTE_CMP >			|
+		operator = 	< LTE_CMP >			
+	)
+	{
+		sNode.setValue(operator.image.toString());
+		return sNode;
+	}
+}
+
+stringNode arithmeticOperators() : 
+{
+	Token operator;
+	stringNode sNode = new stringNode();
+}
+{
+	(
+		operator = 	< ADD >			|
+		operator = 	< SUB >			|
+		operator = 	< MUL >			|
+		operator = 	< DIV >			|
+		operator = 	< REM >		
+	)
+	{
+		sNode.setValue(operator.image.toString());
+		return sNode;
+	}
+}
+
+stringNode modificationOperators() : 
+{
+	Token operator;
+	stringNode sNode = new stringNode();
+}
+{
+	(
+		operator =	< ADD_ASSIGN >		|
+		operator = 	< SUB_ASSIGN >		|
+		operator = 	< MUL_ASSIGN >		|
+		operator = 	< DIV_ASSIGN >		|
+		operator = 	< REM_ASSIGN > 		|
+		operator =	< AND_ASSIGN >		|
+		operator =	< OR_ASSIGN >		|
+		operator =	< XOR_ASSIGN >		|
+		operator =	< SHL_ASSIGN >		|
+		operator =	< SHR_ASSIGN > 		
+	)
+	{
+		sNode.setValue(operator.image);
+		return sNode;
+	}
+}
+
+
+whileNode whileStatement() :
+{
+	conditionNode cNode;
+	blockNode bNode = new blockNode();
+	whileNode wNode = new whileNode();
+}
+{
+	< WHILE_STMT >
+		cNode = condition() {  wNode.addChild(cNode); }
+		(
+			bNode = statement()
+			{
+				wNode.addChild(bNode);
+			}
+			|
+			< OPEN_CB >
+				(
+					bNode = statements()
+					{
+						wNode.addChild(bNode);
+					}
+				)*
+			< CLOSE_CB >				
+		)
+		{
+			return wNode;
+		}
+}
+
+doWhileNode doWhileStatement() :
+{
+	conditionNode cNode;
+	blockNode bNode = new blockNode();
+	doWhileNode wNode = new doWhileNode();
+}
+{
+	< DO_STMT >
+	(
+		bNode = statement()
+		{
+			wNode.addChild(bNode);
+		}
+		|
+		< OPEN_CB >
+			(
+				bNode = statements()
+				{
+					wNode.addChild(bNode);
+				}
+			)*
+		< CLOSE_CB >				
+	)
+	< WHILE_STMT >
+	cNode = condition() {  wNode.addChild(cNode); }
+	< SEMICOLON >
+	{
+		return wNode;
+	}
+}
+
+variableDeclarationNode variableDeclaration() :
+{
+	Token type, name, temp;
+	stringNode sNode = new stringNode();
+	stringNode tNode = new stringNode();
+	constantNode cNode = new constantNode();
+	constantNode value;
+	variableDeclarationNode vdNode = new variableDeclarationNode();
+}
+{
+		(
+			(
+				(
+					type = < INT_TYPE >		|
+					type = < FLOAT_TYPE >	|
+					type = < DOUBLE_TYPE >
+				)
+				name = < IDENTIFIER >
+				(					< ASSIGN >
+					(
+						cNode = expression()
+					)
+				)?
+			)
+			/*
+			|
+			(
+				(
+					type = < INT_TYPE >		|
+					type = < CHAR_TYPE >
+				)
+				name = < IDENTIFIER >
+				< ASSIGN >
+				value = character()
+			)
+			*/
+		)
+		< SEMICOLON >
+		{
+			tNode.setValue(type.image);
+			sNode.setValue(name.image);
+
+			vdNode.addChild(tNode);
+			vdNode.addChild(sNode);
+			vdNode.addChild(cNode);
+			return vdNode;
+		}
+}
+
+variableDeclarationNode variableDeclarationBody() :
+{
+	Token type, name, temp;
+	stringNode sNode = new stringNode();
+	stringNode tNode = new stringNode();
+	constantNode cNode = new constantNode();
+	constantNode value;
+	variableDeclarationNode vdNode = new variableDeclarationNode();
+}
+{
+		(
+			(
+				(
+					type = < INT_TYPE >		|
+					type = < FLOAT_TYPE >	|
+					type = < DOUBLE_TYPE >
+				)
+				name = < IDENTIFIER >
+				(
+					< ASSIGN >
+					(
+						cNode = expression()
+					)
+				)?
+			)
+			/*
+			|
+			(
+				(
+					type = < INT_TYPE >		|
+					type = < CHAR_TYPE >
+				)
+				name = < IDENTIFIER >
+				< ASSIGN >
+				value = character()
+			)
+			*/
+		)
+		{
+			tNode.setValue(type.image);
+			sNode.setValue(name.image);
+
+			vdNode.addChild(tNode);
+			vdNode.addChild(sNode);
+			vdNode.addChild(cNode);
+			return vdNode;
+		}
+}
+
+// This function is really useless ,
+// nevertheless , it's here to prevent a disaster
+stringNode assignmentOperator() :
+{
+	stringNode sNode = new stringNode();
+	Token t;
+} 
+{
+	t = < ASSIGN >
+	{
+		sNode.setValue(t.image);
+		return sNode;
+	}
+}
+
+modificationNode modification() :
+{
+	modificationNode mNode = new modificationNode();
+	Token tVarName, tOperator;
+	constantNode nValue;
+	stringNode varName = new stringNode();
+	stringNode operator;
+	constantNode value = new constantNode();
+}
+{
+	LOOKAHEAD(2)
+	(
+		tVarName = < IDENTIFIER >
+		(
+			operator = modificationOperators() |
+			operator = assignmentOperator()
+		)
+		nValue = expression()
+		< SEMICOLON >
+		{
+			varName.setValue(tVarName.image);
+			//value.setValue(nValue);
+			
+			mNode.addChild(varName);
+			mNode.addChild(nValue);
+			mNode.addChild(operator);
+			
+			return mNode;
+		}
+	)
+	|
+	(
+		tVarName = < IDENTIFIER >
+		(
+			tOperator = < INC > |
+			tOperator = < DEC >
+		)
+		< SEMICOLON >
+		{
+			operator = new stringNode();
+			varName.setValue(tVarName.image);
+			operator.setValue(tOperator.image);
+			
+			mNode.addChild(varName);
+			mNode.addChild(operator);
+			
+			return mNode;
+		}
+	)				
+}
+
+modificationNode modificationBody() :
+{
+	modificationNode mNode = new modificationNode();
+	Token tVarName, tOperator;
+	constantNode nValue;
+	stringNode varName = new stringNode();
+	stringNode operator;
+	constantNode value = new constantNode();
+}
+{
+	LOOKAHEAD(2)
+	(
+		tVarName = < IDENTIFIER >
+		(
+			operator = modificationOperators() |
+			operator = assignmentOperator()
+		)
+		nValue = expression()
+		{
+			varName.setValue(tVarName.image);
+			//value.setValue(nValue);
+			
+			mNode.addChild(varName);
+			mNode.addChild(nValue);
+			mNode.addChild(operator);
+			
+			return mNode;
+		}
+	)
+	|
+	(
+		tVarName = < IDENTIFIER >
+		(
+			tOperator = < INC > |
+			tOperator = < DEC >
+		)
+		{
+			operator = new stringNode();
+			varName.setValue(tVarName.image);
+			operator.setValue(tOperator.image);
+			
+			mNode.addChild(varName);
+			mNode.addChild(operator);
+			
+			return mNode;
+		}
+	)
+}
+
+gotoNode gotoStatement() :
+{
+	gotoNode gNode = new gotoNode();
+	stringNode lNode = new stringNode();
+	blockNode bNode = new blockNode();
+	stringNode eNode = new stringNode();
+
+	Token label;
+}
+{
+	(
+		label = < IDENTIFIER >
+		< COLON >
+		bNode = statements()
+		< GOTO_STMT >
+		label = < IDENTIFIER >
+		< SEMICOLON >
+	)
+	{
+		lNode.setValue(label.image);
+
+		gNode.addChild(lNode);
+		gNode.addChild(bNode);
+
+		return gNode;
+	}
+}
+
+forNode forStatement() :
+{
+	treeNode iNode;
+	conditionNode cNode;
+	treeNode mNode;
+	blockNode bNode = new blockNode();
+	forNode fNode = new forNode();
+}
+{
+	< FOR_STMT >
+	< OPEN_P >
+		(
+			(
+				iNode = variableDeclarationBody() |
+				iNode = modificationBody()
+			)
+			{
+				fNode.addChild(iNode);
+			}
+		)
+		< SEMICOLON >
+		(			cNode = conditionBody() {  fNode.addChild(cNode); }
+		)
+		< SEMICOLON >
+		(			mNode = modificationBody() { fNode.addChild(mNode); }
+		)
+		< CLOSE_P >
+		(
+			bNode = statement()
+			{
+				fNode.addChild(bNode);
+			}
+			|
+			< OPEN_CB > 
+				(
+					bNode = statements()
+					{
+						fNode.addChild(bNode);
+					}
+				)
+			< CLOSE_CB >				
+		)
+		{
+			return fNode;
+		}
+}
+
+constantNode expression() :
+{
+	constantNode result = new constantNode();
+}
+{
+	result = A_expression()
+	{
+		return result;
+	}
+}
+
+constantNode A_expression() :
+{ 
+	expressionNode exp = new expressionNode();
+	constantNode a;
+	constantNode b;
+}
+{
+	a = B_expression()
+	(
+		LOOKAHEAD(2)
+		< BITWISE_OR >
+		b = A_expression()
+		{ a = a.Operation("|", b); }
+	)*
+	{
+		return a;
+	}
+}
+
+constantNode B_expression() :
+{ 
+	expressionNode exp = new expressionNode();
+	constantNode a;
+	constantNode b;
+}
+{
+	a = C_expression()
+	(
+		LOOKAHEAD(2)
+		< BITWISE_XOR >
+		b = B_expression()
+		{ a = a.Operation("^", b); }
+	)*
+	{
+		return a;
+	}
+}
+
+constantNode C_expression() :
+{ 
+	expressionNode exp = new expressionNode();
+	constantNode a;
+	constantNode b;
+}
+{
+	a = D_expression()
+	(
+		LOOKAHEAD(2)
+		< BITWISE_AND > b = C_expression() { a = a.Operation("&", b); }
+	)*
+	{
+		return a;
+	}
+}
+
+constantNode D_expression() :
+{ 
+	expressionNode exp = new expressionNode();
+	constantNode a;
+	constantNode b;
+	Token op;
+}
+{
+	a = E_expression()
+	( 
+		LOOKAHEAD(2)
+		(
+			op = < SHL >	b = D_expression()	|
+			op = < SHR >	b = D_expression()
+		)
+		{
+			a = a.Operation(op.image, b);
+		}
+	)*
+	{
+		return a;
+	}
+}
+
+constantNode E_expression():
+{
+    constantNode a;
+    constantNode b;
+    Token op;
+}
+{
+    a = F_expression()
+    (
+    	LOOKAHEAD(2)
+    	(				
+        	op = < ADD > b = E_expression()	|
+        	op = < SUB > b = E_expression()
+     	)
+     	{
+			a = a.Operation(op.image, b);
+     	}
+    )*
+    { return a; }
+}
+
+constantNode F_expression():
+{
+    constantNode a;
+    constantNode b;
+    Token op;
+}
+{
+    a = G_expression()
+    (
+    	LOOKAHEAD(2)
+        (        	op = < MUL > b = F_expression()	|
+        	op = < DIV > b = F_expression() |
+        	op = < REM > b = F_expression() 
+     	)
+     	{
+			a = a.Operation(op.image, b);
+     	} 
+    )*
+    { return a; }
+}
+
+constantNode G_expression() :
+{
+	constantNode value = new constantNode();
+	Token op = null;
+}
+{
+	(		(			op = < ADD >	|
+			op = < SUB >	|
+			op = < TILDE >
+		)
+	)?
+	value = H_expression()
+	{
+		if (op != null) {
+			value.setUnaryOperator(op.image);
+		}
+		return value;
+	}	
+}
+
+constantNode H_expression() :
+{
+	Token temp;
+	Token op;
+	double val;
+	boolean isVariable;
+	constantNode exp;
+}
+{
+	(
+		(
+			< OPEN_P >
+				exp = A_expression()
+			< CLOSE_P >
+		)
+		{
+			return exp;
+		}
+	)
+	/*
+	|
+	(		(			exp = A_expression()
+			(
+				op = < INC >	|
+				op = < DEC >
+			)
+		)
+		{
+			exp.setPostfixOperator(op.image);
+			return exp;
+		}
+	)
+	*/		
+	|				
+	(
+		(
+			temp = number() 	  { isVariable = false; 	}	|
+			temp = < IDENTIFIER > { isVariable = true; 		}
+		)
+		{
+			constantNode cNode = new constantNode();
+			if (isVariable) {
+				cNode.setValue(temp.image, true);
+			}
+			else {
+				cNode.setValue(temp.image);
+			}
+			return cNode;
+		}
+	)
+}
+
+Token number() :
+{
+	Token value;
+}
+{
+	(
+		value = < BASE_10 >	|
+		value = < BASE_8 >	|
+		value = < BASE_16 >
+	) 
+	{ 
+		return value;
+	}
+}
+
+constantNode string() :
+{
+	Token temp;
+	constantNode cNode = new constantNode();
+}
+{
+	temp = < STRING >
+	{
+		cNode.setValue(temp.image);
+		return cNode;
+	}
+}
+
+constantNode character() :
+{
+	Token temp;
+	constantNode cNode = new constantNode();
+}
+{
+	temp = < CHAR >
+	{
+		cNode.setValue(temp.image);
+		return cNode;
+	}
+}
+
+blockNode statements() :
+{
+	treeNode tNode;
+	blockNode bNode = new blockNode();
+}
+{
+	(
+		LOOKAHEAD(2) 
+		(
+			tNode = statement()
+		)
+		{
+			bNode.addChild(tNode);
+		}									
+	)+
+	{
+		return bNode;
+	}			
+}
+
+blockNode statement() :
+{
+	Object tNode;
+	blockNode bNode = new blockNode();
+}
+{
+	(
+		(
+			tNode = ifStatement() 			|
+	 		tNode = printfStatement()		|
+	 		tNode = scanfStatement()		|
+	 		tNode = whileStatement()		|
+	 		tNode = doWhileStatement()		|
+	 		tNode = forStatement()			|
+	 		tNode = switchStatement()		|
+	 		LOOKAHEAD(2)
+	 		tNode = modification()			|
+	 		//tNode = gotoStatement()			|
+	 		tNode = expression()				|
+	 		tNode = variableDeclaration()		
+		)
+	 	{
+			if (typeCheck.isNumeric(tNode)) {
+				constantNode cNode = new constantNode();
+				cNode.setValue(tNode);
+				bNode.addChild((treeNode)cNode);
+			}
+			else {
+				bNode.addChild((treeNode)tNode);
+			}
+			return bNode;
+		}
+	)						
+}
+
+JAVACODE
+void skipToNextCommand()
+{
+	ParseException e = generateParseException();
+	System.out.print("Exception ................ statement is ignored \n");
+
+	Token t;
+
+	do
+	{
+		t = getNextToken();
+		System.out.print("Token is ignored" + t.image);
+	} while (t.kind != SEMICOLON);
+
+}

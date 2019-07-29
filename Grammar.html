@@ -1,0 +1,617 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+<TITLE>BNF for Grammar.jj </TITLE>
+</HEAD>
+<BODY>
+<H1 ALIGN=CENTER>BNF for Grammar.jj </H1>
+<H2 ALIGN=CENTER>TOKENS</H2>
+<TABLE>
+ <!-- Token -->
+ <TR>
+  <TD>
+   <PRE>
+&lt;DEFAULT&gt; SKIP : {
+" "
+| "\r"
+| "\t"
+| "\n"
+}
+
+   </PRE>
+  </TD>
+ </TR>
+ <!-- Token -->
+ <TR>
+  <TD>
+   <PRE>
+&lt;DEFAULT&gt; TOKEN : {
+&lt;#LETTER: ["A"-"Z","a"-"z","_"]&gt;
+| &lt;#DIGIT: ["0"-"9"]&gt;
+| &lt;BASE_8: "0" (["0"-"7"])*&gt;
+| &lt;BASE_10: "0" | ["1"-"9"] (&lt;DIGIT&gt;)* ("." (&lt;DIGIT&gt;){0,15})?&gt;
+| &lt;BASE_16: "0" ("x" | "X") (["0"-"9","A"-"F","a"-"f"])+&gt;
+| &lt;NUMBER: "0" | ["1"-"9"] (&lt;DIGIT&gt;)* ("." (&lt;DIGIT&gt;){0,15})?&gt;
+| &lt;OPEN_CB: "{"&gt;
+| &lt;CLOSE_CB: "}"&gt;
+| &lt;OPEN_P: "("&gt;
+| &lt;CLOSE_P: ")"&gt;
+| &lt;COLON: ":"&gt;
+| &lt;SEMICOLON: ";"&gt;
+| &lt;COMMA: ","&gt;
+| &lt;ASSIGN: "="&gt;
+| &lt;EQUAL_CMP: "=="&gt;
+| &lt;NOT_EQUAL_CMP: "!="&gt;
+| &lt;GT_CMP: "&gt;"&gt;
+| &lt;LT_CMP: "&lt;"&gt;
+| &lt;GTE_CMP: "&gt;="&gt;
+| &lt;LTE_CMP: "&lt;="&gt;
+| &lt;IF_STMT: "if"&gt;
+| &lt;ELSE_STMT: "else"&gt;
+| &lt;PRINTF: "printf"&gt;
+| &lt;WHILE_STMT: "while"&gt;
+| &lt;FOR_STMT: "for"&gt;
+| &lt;GOTO_STMT: "goto"&gt;
+| &lt;CHAR: "\'" ~["\""] "\'"&gt;
+| &lt;STRING: "\"" (~["\""])* "\""&gt;
+| &lt;BITWISE_OR: "|"&gt;
+| &lt;BITWISE_XOR: "^"&gt;
+| &lt;BITWISE_AND: "&amp;"&gt;
+| &lt;SHL: "&lt;&lt;"&gt;
+| &lt;SHR: "&gt;&gt;"&gt;
+| &lt;NOT: "!"&gt;
+| &lt;INC: "++"&gt;
+| &lt;DEC: "--"&gt;
+| &lt;ADD: "+"&gt;
+| &lt;SUB: "-"&gt;
+| &lt;MUL: "*"&gt;
+| &lt;DIV: "/"&gt;
+| &lt;REM: "%"&gt;
+| &lt;TILDE: "~"&gt;
+| &lt;ADD_ASSIGN: "+="&gt;
+| &lt;SUB_ASSIGN: "-="&gt;
+| &lt;MUL_ASSIGN: "*="&gt;
+| &lt;DIV_ASSIGN: "/="&gt;
+| &lt;REM_ASSIGN: "%="&gt;
+| &lt;INT_TYPE: "int"&gt;
+| &lt;FLOAT_TYPE: "float"&gt;
+| &lt;DOUBLE_TYPE: "double"&gt;
+| &lt;CHAR_TYPE: "char"&gt;
+| &lt;IDENTIFIER: &lt;LETTER&gt; (&lt;LETTER&gt; | &lt;DIGIT&gt;)*&gt;
+}
+
+   </PRE>
+  </TD>
+ </TR>
+</TABLE>
+<H2 ALIGN=CENTER>NON-TERMINALS</H2>
+<TABLE>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod1">start</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE><A HREF="#prod2">statements</A> &lt;SEMICOLON&gt;</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod3">ifStatement</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;IF_STMT&gt; <A HREF="#prod4">condition</A> ( <A HREF="#prod5">statement</A> | &lt;OPEN_CB&gt; ( <A HREF="#prod2">statements</A> )* &lt;CLOSE_CB&gt; ) ( &lt;ELSE_STMT&gt; &lt;IF_STMT&gt; <A HREF="#prod4">condition</A> <A HREF="#prod5">statement</A> | &lt;OPEN_CB&gt; ( <A HREF="#prod2">statements</A> )* &lt;CLOSE_CB&gt; ) ( &lt;ELSE_STMT&gt; <A HREF="#prod5">statement</A> | &lt;OPEN_CB&gt; ( <A HREF="#prod2">statements</A> )* &lt;CLOSE_CB&gt; )?</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod4">condition</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;OPEN_P&gt; ( <A HREF="#prod6">number</A> | &lt;IDENTIFIER&gt; ) <A HREF="#prod7">operators</A> ( <A HREF="#prod6">number</A> | &lt;IDENTIFIER&gt; ) &lt;CLOSE_P&gt;</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod8">conditionBody</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( <A HREF="#prod6">number</A> | &lt;IDENTIFIER&gt; ) <A HREF="#prod7">operators</A> ( <A HREF="#prod6">number</A> | &lt;IDENTIFIER&gt; )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod9">printfStatement</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;PRINTF&gt; &lt;OPEN_P&gt; &lt;STRING&gt; ( ( &lt;COMMA&gt; ( ( <A HREF="#prod10">value</A> ) | ( &lt;IDENTIFIER&gt; ) ) ) )* &lt;CLOSE_P&gt; &lt;SEMICOLON&gt;</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod7">operators</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;EQUAL_CMP&gt; | &lt;NOT_EQUAL_CMP&gt; | &lt;GT_CMP&gt; | &lt;LT_CMP&gt; | &lt;GTE_CMP&gt; | &lt;LTE_CMP&gt; )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod11">arithmeticOperators</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;ADD&gt; | &lt;SUB&gt; | &lt;MUL&gt; | &lt;DIV&gt; | &lt;REM&gt; )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod12">modificationOperators</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;ADD_ASSIGN&gt; | &lt;SUB_ASSIGN&gt; | &lt;MUL_ASSIGN&gt; | &lt;DIV_ASSIGN&gt; | &lt;REM_ASSIGN&gt; )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod13">whileStatement</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;WHILE_STMT&gt; <A HREF="#prod4">condition</A> ( <A HREF="#prod5">statement</A> | &lt;OPEN_CB&gt; ( <A HREF="#prod2">statements</A> )* &lt;CLOSE_CB&gt; )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod14">variableDeclaration</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( ( ( &lt;INT_TYPE&gt; | &lt;FLOAT_TYPE&gt; | &lt;DOUBLE_TYPE&gt; ) &lt;IDENTIFIER&gt; &lt;ASSIGN&gt; ( <A HREF="#prod15">A_expression</A> ) ) ) &lt;SEMICOLON&gt;</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod16">variableDeclarationBody</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( ( ( &lt;INT_TYPE&gt; | &lt;FLOAT_TYPE&gt; | &lt;DOUBLE_TYPE&gt; ) &lt;IDENTIFIER&gt; &lt;ASSIGN&gt; <A HREF="#prod6">number</A> ) | ( ( &lt;INT_TYPE&gt; | &lt;CHAR_TYPE&gt; ) &lt;IDENTIFIER&gt; &lt;ASSIGN&gt; &lt;CHAR&gt; ) )</TD>
+</TR>
+ <!-- Special token -->
+ <TR>
+  <TD>
+<PRE>
+// This function is really useless ,
+// nevertheless , it's here to prevent a disaster
+</PRE>
+  </TD>
+ </TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod17">assignmentOperator</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;ASSIGN&gt;</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod18">modification</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;IDENTIFIER&gt; ( <A HREF="#prod12">modificationOperators</A> | <A HREF="#prod17">assignmentOperator</A> ) <A HREF="#prod6">number</A> &lt;SEMICOLON&gt;</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod19">modificationBody</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;IDENTIFIER&gt; ( <A HREF="#prod12">modificationOperators</A> | <A HREF="#prod17">assignmentOperator</A> ) <A HREF="#prod6">number</A></TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod20">gotoStatement</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;IDENTIFIER&gt; &lt;COLON&gt; <A HREF="#prod2">statements</A> &lt;GOTO_STMT&gt; &lt;IDENTIFIER&gt; &lt;SEMICOLON&gt; )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod21">forStatement</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;FOR_STMT&gt; &lt;OPEN_P&gt; ( ( <A HREF="#prod16">variableDeclarationBody</A> | <A HREF="#prod19">modificationBody</A> ) ) &lt;SEMICOLON&gt; <A HREF="#prod8">conditionBody</A> &lt;SEMICOLON&gt; <A HREF="#prod19">modificationBody</A> &lt;CLOSE_P&gt; ( <A HREF="#prod5">statement</A> | &lt;OPEN_CB&gt; ( <A HREF="#prod2">statements</A> ) &lt;CLOSE_CB&gt; )</TD>
+</TR>
+ <!-- Special token -->
+ <TR>
+  <TD>
+<PRE>
+/*
+expressionNode A_expression() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+}
+{
+	(		exp1 = B_expression()
+		exp2 = A_alt()
+	)
+	{
+		exp.addChild(exp1);
+		exp.addChild(exp2);
+		//System.out.println("A expression");
+		return exp;
+	}
+}
+
+expressionNode A_alt() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+	stringNode opNode = new stringNode();
+	Token op;
+}
+{
+	(
+		LOOKAHEAD(2)
+		(			op = < BITWISE_OR >
+			exp1 = B_expression()
+			exp2 = A_alt()
+		)
+		{
+			opNode.setValue(op.image);
+			exp.addChild(exp1);
+			exp.addChild(opNode);
+			exp.addChild(exp2);
+			//System.out.println("A_alt expression");
+		}
+	)*
+	{
+		//System.out.println("A_alt expression  , total length: " + exp.size());
+		return exp;
+	}
+}
+
+expressionNode B_expression() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+}
+{
+	(		exp1 = C_expression()
+		exp2 = B_alt()
+	)
+	{
+		exp.addChild(exp1);
+		exp.addChild(exp2);
+		//System.out.println("B expression");
+		return exp;
+	}
+}
+
+expressionNode B_alt() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+	stringNode opNode = new stringNode();
+	Token op;
+}
+{
+	(
+		LOOKAHEAD(2)
+		(			
+			op = < BITWISE_XOR >
+			exp1 = C_expression()
+			exp2 = B_alt()
+		)
+		{
+			opNode.setValue(op.image);
+			exp.addChild(exp1);
+			exp.addChild(opNode);
+			exp.addChild(exp2);
+			//System.out.println("B_alt expression");
+		}
+	)*
+	{
+		//System.out.println("B_alt expression  , total length: " + exp.size());
+		return exp;
+	}
+}
+
+expressionNode C_expression() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+}
+{
+	(		exp1 = D_expression()
+		exp2 = C_alt()
+	)
+	{
+		exp.addChild(exp1);
+		exp.addChild(exp2);
+		//System.out.println("C expression");
+		return exp;
+	}
+}
+
+expressionNode C_alt() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+	stringNode opNode = new stringNode();
+	Token op;
+}
+{
+	(
+		LOOKAHEAD(2)
+		(			op = < BITWISE_AND >
+			exp1 = D_expression()
+			exp2 = C_alt()
+		)
+		{
+			opNode.setValue(op.image);
+			exp.addChild(exp1);
+			exp.addChild(opNode);
+			exp.addChild(exp2);
+			//System.out.println("C_alt expression");
+		}
+	)*
+	{
+		//System.out.println("C_alt expression  , total length: " + exp.size());
+		return exp;
+	}
+}
+
+expressionNode D_expression() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+}
+{
+	(		exp1 = E_expression()
+		exp2 = D_alt()
+	)
+	{
+		exp.addChild(exp1);
+		exp.addChild(exp2);
+		//System.out.println("D expression");
+		return exp;
+	}
+}
+
+expressionNode D_alt() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+	stringNode opNode = new stringNode();
+	Token op;
+}
+{
+	(
+		LOOKAHEAD(2)
+		(			(
+				op = < SHL >	|
+				op = < SHR >
+			)
+			exp1 = E_expression()
+			exp2 = D_alt()
+		)
+		{
+			opNode.setValue(op.image);
+			exp.addChild(exp1);
+			exp.addChild(opNode);
+			exp.addChild(exp2);
+			//System.out.println("D_alt expression");
+		}
+	)*
+	{
+		//System.out.println("D_alt expression  , total length: " + exp.size());
+		return exp;
+	}
+}
+
+expressionNode E_expression() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+}
+{
+	(		exp1 = F_expression()
+		exp2 = E_alt()
+	)
+	{
+		exp.addChild(exp1);
+		exp.addChild(exp2);
+		//System.out.println("E expression");
+		return exp;
+	}
+}
+
+expressionNode E_alt() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+	stringNode opNode = new stringNode();
+	Token op;
+}
+{
+	(
+		LOOKAHEAD(2)
+		(
+			(
+				op = < ADD >	|
+				op = < SUB >
+			)
+			exp1 = F_expression()
+			exp2 = E_alt()
+		)
+		{
+			opNode.setValue(op.image);
+			exp.addChild(exp1);
+			exp.addChild(opNode);
+			exp.addChild(exp2);
+			//System.out.println("E_alt expression");
+		}
+	)*
+	{
+		//System.out.println("E_alt expression  , total length: " + exp.size());
+		return exp;
+	}
+}
+
+expressionNode F_expression() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+}
+{
+	(		exp1 = G_expression()
+		exp2 = F_alt()
+	)
+	{
+		exp.addChild(exp1);
+		exp.addChild(exp2);
+		//System.out.println("F expression");
+		return exp;
+	}
+}
+
+expressionNode F_alt() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+	stringNode opNode = new stringNode();
+	Token op; 
+}
+{
+	(
+		LOOKAHEAD(2)
+		(			(
+				op = < MUL >	|
+				op = < DIV >	|
+				op = < REM >
+			)
+			exp1 = G_expression()
+			exp2 = F_alt()
+		)
+		{
+			opNode.setValue(op.image);
+			exp.addChild(exp1);
+			exp.addChild(opNode);
+			exp.addChild(exp2);
+			//System.out.println("F_alt expression");
+		}
+	)*
+	{
+		//System.out.println("F_alt expression  , total length: " + exp.size());
+		return exp;
+	}
+}
+
+expressionNode G_expression() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+	stringNode opNode = new stringNode();
+	Token op;
+}
+{
+	(		(
+			(
+				op = < ADD >			|
+				op = < SUB >			|
+				op = < INC >			|
+				op = < DEC >			|
+				op = < TILDE >			|
+				op = < NOT >			|
+				op = < BITWISE_AND >	
+			)
+			{
+				opNode.setValue(op.image);
+				exp.addChild(opNode);
+			}
+		)?
+		exp1 = H_expression()
+	)
+	{
+		exp.addChild(exp1);
+		//System.out.println("G expression");
+		return exp;
+	}
+}
+
+expressionNode H_expression() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+	constantNode cNode = new constantNode();
+	stringNode opNode = new stringNode();
+	Token number;
+}
+{			
+	(		(
+			(				< OPEN_P >
+					exp1 = A_expression()
+				< CLOSE_P >
+				exp2 = H_alt()
+			)
+			{
+				exp.addChild(exp1);
+				exp.addChild(exp2);
+			}
+		)
+		|				
+		(
+			(				number = number()
+				exp1 = H_alt()
+			)
+			{
+				cNode.setValue(number.image);
+				exp.addChild(cNode);
+				exp.addChild(exp1);
+			}
+		)
+	)
+	{
+		//System.out.println("H expression");
+		return exp;
+	}										
+}
+
+expressionNode H_alt() :
+{
+	expressionNode exp = new expressionNode();
+	expressionNode exp1, exp2;
+	stringNode opNode = new stringNode();
+	Token op;
+}
+{
+	(
+		LOOKAHEAD(2) 
+		(			(
+				op = < INC >	|
+				op = < DEC >
+			)
+			exp1 = H_alt()
+		)
+		{
+			opNode.setValue(op.image);
+			exp.addChild(opNode);
+			exp.addChild(exp1);
+			//System.out.println("H_alt expression");
+		}
+	)*
+	{
+		//System.out.println("H_alt expression , total length: " + exp.size());
+		return exp;
+	}
+}
+*/</PRE>
+  </TD>
+ </TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod15">A_expression</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( <A HREF="#prod22">B_expression</A> ( ( &lt;ADD&gt; | &lt;SUB&gt; ) <A HREF="#prod22">B_expression</A> )* )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod22">B_expression</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( <A HREF="#prod23">C_expression</A> ( ( &lt;MUL&gt; | &lt;DIV&gt; | &lt;REM&gt; ) <A HREF="#prod23">C_expression</A> )* )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod23">C_expression</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( ( &lt;OPEN_P&gt; <A HREF="#prod15">A_expression</A> &lt;CLOSE_P&gt; ) | ( <A HREF="#prod6">number</A> ) )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod6">number</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;BASE_10&gt; | &lt;BASE_8&gt; | &lt;BASE_16&gt; )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod10">value</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;CHAR&gt;</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>|</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;STRING&gt;</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>|</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE><A HREF="#prod6">number</A></TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod2">statements</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( ( <A HREF="#prod5">statement</A> ) )+</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod5">statement</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( ( <A HREF="#prod3">ifStatement</A> | <A HREF="#prod9">printfStatement</A> | <A HREF="#prod13">whileStatement</A> | <A HREF="#prod21">forStatement</A> | <A HREF="#prod18">modification</A> | <A HREF="#prod14">variableDeclaration</A> | <A HREF="#prod15">A_expression</A> ) )</TD>
+</TR>
+<TR>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod24">skipToNextCommand</A></TD>
+<TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE><I>java code</I></TD></TR>
+</TABLE>
+</BODY>
+</HTML>

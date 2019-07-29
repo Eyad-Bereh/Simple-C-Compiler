@@ -1,0 +1,50 @@
+/*
+int x = 0;
+int y = 0;
+int z = 0;
+
+while (x <= 6) {
+	y = 0;
+	while (y <= x) {
+		z = 0;
+		while (z <= y) {
+			printf("(%d, %d, %d)", x, y, z);
+			z++;
+		}
+		y++;
+	}
+	x++;
+}
+*/
+
+int i = 2;
+int j = 3;
+for (int i = 7; i > -10; i -= 1) {
+	for (int j = 5; j < 10; j++) {
+		printf("%d, %d", i, j);
+	}
+}
+
+/*
+int x = 8;
+switch (x) {
+	case 7 + 1: 
+	printf("case 1"); 
+	break;
+
+	case 8: 
+	printf("case 2"); 
+	break;
+
+	
+	default:
+	printf("default");
+	
+}
+int y = 4;
+double z = 9.6;
+*/
+/*char test = 'd';*/
+
+
+/*printf("%c", 'g');*/
